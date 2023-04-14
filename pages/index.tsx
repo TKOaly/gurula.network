@@ -100,7 +100,7 @@ const TabBar = <T extends TabBarTab>({ tabs, selected, onSelect }: TabBarProps<T
   }, [backgroundRef]);
 
   return (
-    <div className="flex-col md:flex-row flex gap-x-3 gap-y-1 relative items-start">
+    <div className="flex gap-x-3 gap-y-1 relative items-start">
       <div
         ref={backgroundRef}
         className={`absolute rounded-md bg-zinc-100 transition-[width,heigth,left,top] bg-opacity-20 duration-200`}
