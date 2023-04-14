@@ -302,7 +302,7 @@ export default function Home({ purchasesPerHour, caffeinePerHour, mostPopularIte
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between px-6 py-3 lg:py-16 lg:px-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm self-stretch">
+      <div className="max-w-5xl items-center justify-between font-mono text-sm">
         <div className="mb-3 lg:mb-10 flex">
           <div className="w-[15em] lg:w-[30em]">
             <Logo />
