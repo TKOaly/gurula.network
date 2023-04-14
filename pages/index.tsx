@@ -190,13 +190,14 @@ export async function getServerSideProps() {
       SELECT
         RVITEM.itemid,
         RVITEM.descr name,
-        COUNT(*) count,
-        PRICE.sellprice price
+        COUNT(*) count
       FROM ITEMHISTORY
       JOIN RVITEM ON RVITEM.itemid = ITEMHISTORY.itemid
-      JOIN PRICE ON PRICE.priceid = ITEMHISTORY.priceid1
-      WHERE actionid = 5 AND TIMESTAMPDIFF(HOUR, time, NOW()) <= ${hours} AND ITEMHISTORY.itemid NOT IN (58, 56, 1432)
+      WHERE actionid = 5
+        AND TIMESTAMPDIFF(HOUR, time, NOW()) <= ${hours}
+        AND ITEMHISTORY.itemid NOT IN (58, 56, 1432)
       GROUP BY RVITEM.itemid
+      ORDER BY COUNT(*) DESC
       LIMIT 10
     ) c
     LEFT JOIN (
