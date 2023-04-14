@@ -28,7 +28,7 @@ const Logo = () => {
   );
 
   return (
-    <svg width="92.318mm" height="18.415mm" version="1.1" viewBox="0 0 92.318 18.415" xmlns="http://www.w3.org/2000/svg" className="w-full">
+    <svg width="92.318mm" height="18.415mm" version="1.1" viewBox="0 0 92.318 18.415" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
       <defs>
         {Object.entries(colors).map(([ name, color ]) => generateGradient(`${name}_gradient`, color))}
       </defs>
@@ -330,22 +330,23 @@ export default function Home({ purchasesPerHour, caffeinePerHour, mostPopularIte
   }, [data, resolution]);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between px-6 py-3 lg:py-16 lg:px-24">
-      <div className="max-w-5xl items-center justify-between font-mono text-sm">
-        <div className="mb-3 lg:mb-10 flex">
-          <div className="w-[15em] lg:w-[30em]">
-            <Logo />
-          </div>
-          <div className="items-center justify-end grow gap-5 hidden sm:flex">
-            <a href="https://tko-aly.fi/" className={`py-1 pl-2 pr-1 cursor-pointer rounded-md font-bold text-zinc-200 bg-zinc-100 bg-opacity-10`}>
-              <span className="relative top-0.5 flex items-center gap-0.5">TKO-äly <ExternalLink className="h-4 relative -top-0.5" /></span>
-            </a>
-            <a href="https://heppa.tko-aly.fi/" className={`py-1 pl-2 pr-1 cursor-pointer rounded-md font-bold text-zinc-200 bg-zinc-100 bg-opacity-10`}>
-              <span className="relative top-0.5 flex items-center gap-0.5">Heppa <ExternalLink className="h-4 relative -top-0.5" /></span>
-            </a>
-          </div>
+    <main className="flex min-h-screen flex-col items-center px-6 py-3 lg:py-16 lg:px-24">
+      <div className="mb-3 lg:mb-10 flex self-stretch p-6">
+        <div className="h-[2.5em] lg:h-[5em]">
+          <Logo />
         </div>
-        <div className="h-[10em] lg:h-[20em]">
+        <div className="grow" />
+        <div className="items-center justify-end grow gap-5 hidden sm:flex">
+          <a href="https://tko-aly.fi/" className={`py-1 pl-2 pr-1 cursor-pointer rounded-md font-bold text-zinc-200 bg-zinc-100 bg-opacity-10`}>
+            <span className="relative top-0.5 flex items-center gap-0.5">TKO-äly <ExternalLink className="h-4 relative -top-0.5" /></span>
+          </a>
+          <a href="https://heppa.tko-aly.fi/" className={`py-1 pl-2 pr-1 cursor-pointer rounded-md font-bold text-zinc-200 bg-zinc-100 bg-opacity-10`}>
+            <span className="relative top-0.5 flex items-center gap-0.5">Heppa <ExternalLink className="h-4 relative -top-0.5" /></span>
+          </a>
+        </div>
+      </div>
+      <div className="w-full lg:w-[60em] items-center flex flex-col justify-between font-mono text-sm">
+        <div className="h-[10em] sm:mt-14 sm:mb-10 lg:h-[20em] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data}>
               <Bar
@@ -377,7 +378,7 @@ export default function Home({ purchasesPerHour, caffeinePerHour, mostPopularIte
             </BarChart>
           </ResponsiveContainer>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mt-5">
+        <div className="grid max-w-[30em] lg:w-full lg:max-w-full grid-cols-1 lg:grid-cols-2 gap-10 mt-3">
           <div className="grow">
             <h2 className="text-2xl text-zinc-200 font-semibold mb-2">Most popular items</h2>
             <TabBar
@@ -425,7 +426,7 @@ export default function Home({ purchasesPerHour, caffeinePerHour, mostPopularIte
           </div>
           <div className="grow">
             <h2 className="text-2xl text-zinc-200 font-semibold">Most recent purchases</h2>
-            <ul className="mt-[3.75em]">
+            <ul className="mt-4 lg:mt-[3.75em]">
               { mostRecentPurchases.map(({ time, name }: any) => (
                 <li key={name} className="py-2 px-3 rounded-md bg-zinc-100 bg-opacity-5 flex gap-2 mb-2">
                   <span className="text-zinc-400">{time}</span>
