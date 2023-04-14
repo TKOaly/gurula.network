@@ -5,7 +5,7 @@ import { Bar, BarChart, Rectangle, ResponsiveContainer, Tooltip, XAxis } from 'r
 import mysql from 'mysql2/promise';
 import { differenceInDays, format, isEqual, startOfDay, subDays, subHours } from 'date-fns';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ExternalLink } from 'react-feather';
+import { ChevronsDown, ChevronsUp, ExternalLink } from 'react-feather';
 
 const shuffle = <T extends unknown>(unshuffled: T[]): T[] => unshuffled
   .map(value => ({ value, sort: Math.random() }))
@@ -129,6 +129,7 @@ export async function getServerSideProps() {
     user: process.env.DB_USER,
     database: process.env.DB_NAME,
     password: process.env.DB_PASSWORD,
+    multipleStatements: true,
   });
 
   const [purchasesPerHourRows]: [Array<{ diff: number, count: number }>] = await db.execute(`
@@ -184,17 +185,31 @@ export async function getServerSideProps() {
   }
 
   const queryPopular = (hours: number) => db.execute(sql`
-    SELECT
-      RVITEM.descr name,
-      COUNT(*) count,
-      PRICE.sellprice price
-    FROM ITEMHISTORY
-    JOIN RVITEM ON RVITEM.itemid = ITEMHISTORY.itemid
-    JOIN PRICE ON PRICE.priceid = ITEMHISTORY.priceid1
-    WHERE actionid = 5 AND TIMESTAMPDIFF(HOUR, time, NOW()) <= ${hours} AND ITEMHISTORY.itemid NOT IN (58, 56, 1432)
-    GROUP BY RVITEM.itemid
-    ORDER BY COUNT(*) DESC
-    LIMIT 10
+    SELECT c.*, p.count AS previous_count
+    FROM (
+      SELECT
+        RVITEM.itemid,
+        RVITEM.descr name,
+        COUNT(*) count,
+        PRICE.sellprice price
+      FROM ITEMHISTORY
+      JOIN RVITEM ON RVITEM.itemid = ITEMHISTORY.itemid
+      JOIN PRICE ON PRICE.priceid = ITEMHISTORY.priceid1
+      WHERE actionid = 5 AND TIMESTAMPDIFF(HOUR, time, NOW()) <= ${hours} AND ITEMHISTORY.itemid NOT IN (58, 56, 1432)
+      GROUP BY RVITEM.itemid
+      LIMIT 10
+    ) c
+    LEFT JOIN (
+      SELECT
+        itemid,
+        COUNT(*) count
+      FROM ITEMHISTORY
+      WHERE actionid = 5
+        AND TIMESTAMPDIFF(HOUR, time, NOW()) > ${hours}
+        AND TIMESTAMPDIFF(HOUR, time, NOW()) <= ${hours * 2}
+      GROUP BY itemid
+    ) p ON p.itemid = c.itemid
+    ORDER BY c.count DESC
   `)
 
   const [[day], [week], [month], [year]] = await Promise.all([
@@ -362,12 +377,36 @@ export default function Home({ purchasesPerHour, caffeinePerHour, mostPopularIte
               onSelect={(key) => setPopularTimeFrame(key)}
             />
             <ul className="mt-4">
-              { mostPopularItems[popularTimeFrame].map(({ count, name }: any) => (
-                <li key={name} className="py-2 px-3 rounded-md bg-zinc-100 bg-opacity-5 flex gap-2 mb-2">
-                  <span className="text-zinc-400">{count}x</span>
-                  <span className="font-semibold text-zinc-200">{name}</span>
-                </li>
-              )) }
+              { mostPopularItems[popularTimeFrame].map(({ count, name, previous_count }: any) => {
+                let trend_indicator = null;
+
+                if (previous_count !== null) {
+                  if (previous_count < count) {
+                    trend_indicator = (
+                      <div className="flex items-center top-0.5 text-green-400 font-bold relative">
+                        { count - previous_count }
+                        <ChevronsUp className="h-4 relative -top-0.5 -left-0.5" strokeWidth={3} />
+                      </div>
+                    );
+                  } else if (previous_count > count) {
+                    trend_indicator = (
+                      <div className="flex items-center top-0.5 text-red-400 font-bold relative">
+                        { previous_count - count }
+                        <ChevronsDown className="h-4 relative -top-0.5 -left-0.5" strokeWidth={3} />
+                      </div>
+                    );
+                  }
+                }
+
+                return (
+                  <li key={name} className="py-2 pl-3 pr-1 rounded-md bg-zinc-100 bg-opacity-5 flex gap-2 mb-2 items-center">
+                    <span className="text-zinc-400">{count}x</span>
+                    <span className="font-semibold text-zinc-200">{name}</span>
+                    <div className="grow" />
+                    { trend_indicator }
+                  </li>
+                );
+              }) }
             </ul>
           </div>
           <div className="grow">
