@@ -5,6 +5,7 @@ import { Bar, BarChart, Rectangle, ResponsiveContainer, Tooltip, XAxis } from 'r
 import mysql from 'mysql2/promise';
 import { differenceInDays, format, isEqual, startOfDay, subDays, subHours } from 'date-fns';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ExternalLink } from 'react-feather';
 
 const shuffle = <T extends unknown>(unshuffled: T[]): T[] => unshuffled
   .map(value => ({ value, sort: Math.random() }))
@@ -301,9 +302,19 @@ export default function Home({ purchasesPerHour, caffeinePerHour, mostPopularIte
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between px-6 py-3 lg:py-16 lg:px-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm">
-        <div className="w-[15em] lg:w-[30em] mb-3 lg:mb-10">
-          <Logo />
+      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm self-stretch">
+        <div className="mb-3 lg:mb-10 flex">
+          <div className="w-[15em] lg:w-[30em]">
+            <Logo />
+          </div>
+          <div className="items-center justify-end grow gap-5 hidden sm:flex">
+            <a href="https://tko-aly.fi/" className={`py-1 pl-2 pr-1 cursor-pointer rounded-md font-bold text-zinc-200 bg-zinc-100 bg-opacity-10`}>
+              <span className="relative top-0.5 flex items-center gap-0.5">TKO-äly <ExternalLink className="h-4 relative -top-0.5" /></span>
+            </a>
+            <a href="https://heppa.tko-aly.fi/" className={`py-1 pl-2 pr-1 cursor-pointer rounded-md font-bold text-zinc-200 bg-zinc-100 bg-opacity-10`}>
+              <span className="relative top-0.5 flex items-center gap-0.5">Heppa <ExternalLink className="h-4 relative -top-0.5" /></span>
+            </a>
+          </div>
         </div>
         <div className="h-[10em] lg:h-[20em]">
           <ResponsiveContainer width="100%" height="100%">
