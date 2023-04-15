@@ -8,6 +8,7 @@ import { useMemo, useRef, useState } from 'react';
 import { ChevronsDown, ChevronsUp, ExternalLink } from 'react-feather';
 import { TabPane, TabPaneContainer } from '@/components/TabPane';
 import { Logo } from '@/components/Logo';
+import { Histogram } from '@/components/Histogram';
 
 const coffeineContentLookup: Record<string, number> = {
   'Coffee': 96,
@@ -138,10 +139,6 @@ export async function getServerSideProps() {
 }
 
 export default function Home({ purchasesPerHour, caffeinePerHour, mostPopularItems, mostRecentPurchases }: any) {
-  const MyBar = ({ fill, diff, ...props }: any) => {
-    return <Rectangle {...props} radius={3} fill={fill} />;
-  };
-
   const [metric, setMetric] = useState('spending');
   const [resolution, setResolution] = useState('hourly');
 
@@ -193,21 +190,6 @@ export default function Home({ purchasesPerHour, caffeinePerHour, mostPopularIte
       return byDate;
     }
   }, [metric, resolution, caffeinePerHour, purchasesPerHour]);
-
-  const ticks = useMemo(() => {
-    if (resolution === 'daily') {
-      return 
-    }
-
-    const ticks = [];
-    const currentHour = new Date().getHours();
-
-    for (let i = data.length - currentHour; i >= 0; i -= 24) {
-      ticks.push(data.length - i - 1);
-    }
-
-    return ticks;
-  }, [data, resolution]);
 
   const popularPanes = useMemo(() => {
     return [['day', 'Day'], ['week', 'Week'], ['month', 'Month'], ['year', 'Year']]
@@ -265,36 +247,7 @@ export default function Home({ purchasesPerHour, caffeinePerHour, mostPopularIte
       </div>
       <div className="w-full lg:w-[60em] items-center flex flex-col justify-between font-mono text-sm">
         <div className="h-[10em] sm:mt-14 sm:mb-10 lg:h-[20em] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data}>
-              <Bar
-                dataKey="count"
-                fill="rgba(255,255,255, 0.3)"
-                barSize={20}
-                shape={MyBar}
-              />
-              <XAxis
-                dataKey="diff"
-                ticks={ticks}
-                tickFormatter={(diff) => resolution === 'hourly' ? format(subHours(new Date(), diff), 'EEE') : format(subDays(new Date(), diff), 'EEE')}
-              />
-              <Tooltip
-                cursor={{ fill: 'rgba(255,255,255,0.1)' }}
-                content={({ payload, label }) => {
-                  try {
-                    return (
-                      <div className="bg-zinc-900 py-1 px-2 rounded-sm bg-opacity-80 text-zinc-200 shadow-lg">
-                        <b>{format(subHours(new Date(), label + 1), 'HH:mm')}-{format(subHours(new Date(), label), 'HH:mm')}</b> <br/>
-                        {payload?.[0]?.value} purchases
-                      </div>
-                    );
-                  } catch (e) {
-                    return null;
-                  }
-                }}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+          <Histogram data={data} />
         </div>
         <div className="grid max-w-[30em] lg:w-full lg:max-w-full grid-cols-1 lg:grid-cols-2 gap-10 mt-3">
           <div className="grow">
