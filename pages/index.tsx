@@ -11,8 +11,7 @@ import { Logo } from '@/components/Logo';
 import { Histogram } from '@/components/Histogram';
 import { pool } from '@/db';
 import { MostPopularList } from '@/components/MostPopularList';
-
-type RecentResponse = Array<{ time: string, neame: string }>;
+import { MostRecentList } from '@/components/MostRecentList';
 
 export default function Home() {
   const [purchasesPerHour, setPurchasesPerHour] = useState<{ count: number, diff: number }[] | null>(null);
@@ -28,19 +27,6 @@ export default function Home() {
     run();
   }, []);
 
-  const [mostRecentPurchases, setMostRecentPurchases] = useState<RecentResponse | null>(null);
-
-  useEffect(() => {
-    const run = async () => {
-      const response = await fetch(`/api/recent`);
-      const data = await response.json();
-
-      setMostRecentPurchases(data);
-    };
-
-    run();
-  }, []);
-  
   const data = useMemo(() => {
     if (purchasesPerHour === null) {
       return [];
@@ -72,17 +58,7 @@ export default function Home() {
         </div>
         <div className="grid max-w-[30em] lg:w-full lg:max-w-full grid-cols-1 lg:grid-cols-2 gap-10 mt-3">
           <MostPopularList />
-          <div className="grow">
-            <h2 className="text-2xl text-zinc-200 font-semibold">Most recent purchases</h2>
-            <ul className="mt-4 lg:mt-[3.75em]">
-              { (mostRecentPurchases ?? []).map(({ time, name }: any) => (
-                <li key={name} className="py-2 px-3 rounded-md bg-zinc-100 bg-opacity-5 flex gap-2 mb-2">
-                  <span className="text-zinc-400">{time}</span>
-                  <span className="font-semibold text-zinc-200">{name}</span>
-                </li>
-              )) }
-            </ul>
-          </div>
+          <MostRecentList />
         </div>
       </div>
     </main>
