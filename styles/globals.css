@@ -22,7 +22,6 @@ body {
 
 .skeleton-box {
   display: inline-block;
-  height: 1em;
   position: relative;
   overflow: hidden;
   @apply bg-zinc-500;
