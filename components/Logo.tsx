@@ -40,7 +40,7 @@ export const Logo = () => {
   );
 
   return (
-    <svg onClick={reshuffleColors} width="92.318mm" height="18.415mm" version="1.1" viewBox="0 0 92.318 18.415" xmlns="http://www.w3.org/2000/svg" className="w-full h-full cursor-pointer">
+    <svg onClick={reshuffleColors} style={{ WebkitTapHighlightColor: 'rgba(0,0,0,0)' }} width="92.318mm" height="18.415mm" version="1.1" viewBox="0 0 92.318 18.415" xmlns="http://www.w3.org/2000/svg" className="w-full h-full cursor-pointer select-none">
       <defs>
         {Object.entries(colors).map(([ name, color ]) => generateGradient(`${name}_gradient`, color))}
       </defs>

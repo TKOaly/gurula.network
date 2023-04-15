@@ -94,7 +94,7 @@ export const TabPaneContainer = ({ children }: TabPaneProps) => {
       />
       <div
         ref={containerRef}
-        className="flex overflow-y-scroll snap-x gap-5 snap-mandatory"
+        className="flex overflow-y-scroll sm:overflow-hidden snap-x gap-5 snap-mandatory"
         onScroll={handleScroll}
       >
         { children }

@@ -64,7 +64,8 @@ export const TabBar = <T extends TabBarTab>({ tabs, selected, onSelect }: TabBar
           <div
             key={tab.key}
             ref={setTabRef(i)}
-            className={`py-1 px-2 transition duration-0 cursor-pointer rounded-md font-bold text-zinc-200 ${selected === tab.key && 'bg-[#6e6e75] delay-200'}`}
+            style={{ WebkitTapHighlightColor: 'rgba(0,0,0,0)' }}
+            className={`py-1 px-2 select-none transition duration-0 cursor-pointer rounded-md font-bold text-zinc-200 ${selected === tab.key && 'bg-[#6e6e75] delay-200'}`}
             onClick={() => handleSelect(tab, i)}
           >
             {tab.label}
