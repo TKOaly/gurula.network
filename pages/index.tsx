@@ -9,17 +9,10 @@ import { ChevronsDown, ChevronsUp, ExternalLink } from 'react-feather';
 import { TabPane, TabPaneContainer } from '@/components/TabPane';
 import { Logo } from '@/components/Logo';
 import { Histogram } from '@/components/Histogram';
+import { pool } from '@/db';
 
 export async function getServerSideProps() {
-  const db = await mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-    multipleStatements: true,
-  });
-
-  const [purchasesPerHourRows]: [Array<{ diff: number, count: number }>] = await db.execute(`
+  const [purchasesPerHourRows]: [Array<{ diff: number, count: number }>] = await pool.execute(`
     SELECT
       TIMESTAMPDIFF(HOUR, time, NOW()) diff,
       COUNT(*) count
@@ -42,7 +35,7 @@ export async function getServerSideProps() {
     }
   }
 
-  const queryPopular = (hours: number) => db.execute(sql`
+  const queryPopular = (hours: number) => pool.execute(sql`
     SELECT c.*, p.count AS previous_count
     FROM (
       SELECT
@@ -80,7 +73,7 @@ export async function getServerSideProps() {
   
   const mostPopularItems = { day, week, month, year };
 
-  const [mostRecentPurchases] = await db.query<any>(`
+  const [mostRecentPurchases] = await pool.query<any>(`
     SELECT
       descr AS name,
       time
