@@ -4,7 +4,7 @@ import { Bar, BarChart, Rectangle, ResponsiveContainer, Tooltip, XAxis } from 'r
 
 import mysql from 'mysql2/promise';
 import { differenceInDays, format, isEqual, startOfDay, subDays, subHours } from 'date-fns';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronsDown, ChevronsUp, ExternalLink } from 'react-feather';
 import { TabPane, TabPaneContainer } from '@/components/TabPane';
 import { Logo } from '@/components/Logo';
@@ -12,29 +12,6 @@ import { Histogram } from '@/components/Histogram';
 import { pool } from '@/db';
 
 export async function getServerSideProps() {
-  const [purchasesPerHourRows]: [Array<{ diff: number, count: number }>] = await pool.execute(`
-    SELECT
-      TIMESTAMPDIFF(HOUR, time, NOW()) diff,
-      COUNT(*) count
-    FROM ITEMHISTORY
-    WHERE actionid = 5 AND time > DATE_SUB(NOW(), INTERVAL 31 DAY)
-    GROUP BY DATE(time), TIMESTAMPDIFF(HOUR, time, NOW())
-    ORDER BY TIMESTAMPDIFF(HOUR, time, NOW()) DESC
-  `) as any;
-
-  let purchasesPerHour: any = [];
-  let i = 0;
-
-  for (let i = purchasesPerHourRows[0].diff; i >= 0; i--) {
-    let count = purchasesPerHourRows.find(r => r.diff === i)?.count;
-
-    if (count) {
-      purchasesPerHour.push({ diff: i, count });
-    } else {
-      purchasesPerHour.push({ diff: i, count: 0 });
-    }
-  }
-
   const queryPopular = (hours: number) => pool.execute(sql`
     SELECT c.*, p.count AS previous_count
     FROM (
@@ -86,15 +63,31 @@ export async function getServerSideProps() {
 
   return {
     props: {
-      purchasesPerHour,
       mostPopularItems,
       mostRecentPurchases: mostRecentPurchases.map((row: any) => ({ name: row.name, time: format(row.time, 'HH:mm') })),
     },
   }
 }
 
-export default function Home({ purchasesPerHour, mostPopularItems, mostRecentPurchases }: any) {
+export default function Home({ mostPopularItems, mostRecentPurchases }: any) {
+  const [purchasesPerHour, setPurchasesPerHour] = useState<{ count: number, diff: number }[] | null>(null);
+
+  useEffect(() => {
+    const run = async () => {
+      const response = await fetch(`/api/spending`);
+      const data = await response.json();
+
+      setPurchasesPerHour(data);
+    };
+
+    run();
+  }, []);
+  
   const data = useMemo(() => {
+    if (purchasesPerHour === null) {
+      return [];
+    }
+
     return [...purchasesPerHour].splice(purchasesPerHour.length - 5 * 24, 5 * 24) as { diff: number, count: number }[];
   }, [purchasesPerHour]);
 
