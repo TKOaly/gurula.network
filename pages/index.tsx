@@ -11,28 +11,10 @@ import { Logo } from '@/components/Logo';
 import { Histogram } from '@/components/Histogram';
 import { pool } from '@/db';
 
-export async function getServerSideProps() {
-  const [mostRecentPurchases] = await pool.query<any>(`
-    SELECT
-      descr AS name,
-      time
-    FROM ITEMHISTORY
-    JOIN RVITEM ON RVITEM.itemid = ITEMHISTORY.itemid
-    WHERE actionid = 5 AND ITEMHISTORY.itemid NOT IN (58, 56, 1432)
-    ORDER BY time
-    DESC LIMIT 10
-  `);
-
-  return {
-    props: {
-      mostRecentPurchases: mostRecentPurchases.map((row: any) => ({ name: row.name, time: format(row.time, 'HH:mm') })),
-    },
-  }
-}
-
 type PopularResponse = Record<'day' | 'week' | 'month' | 'year', { itemid: number, name: string, count: number, previous_count: null | number }[]>;
+type RecentResponse = Array<{ time: string, neame: string }>;
 
-export default function Home({ mostRecentPurchases }: any) {
+export default function Home() {
   const [purchasesPerHour, setPurchasesPerHour] = useState<{ count: number, diff: number }[] | null>(null);
 
   useEffect(() => {
@@ -54,6 +36,19 @@ export default function Home({ mostRecentPurchases }: any) {
       const data = await response.json();
 
       setMostPopularItems(data);
+    };
+
+    run();
+  }, []);
+
+  const [mostRecentPurchases, setMostRecentPurchases] = useState<RecentResponse | null>(null);
+
+  useEffect(() => {
+    const run = async () => {
+      const response = await fetch(`/api/recent`);
+      const data = await response.json();
+
+      setMostRecentPurchases(data);
     };
 
     run();
@@ -135,7 +130,7 @@ export default function Home({ mostRecentPurchases }: any) {
           <div className="grow">
             <h2 className="text-2xl text-zinc-200 font-semibold">Most recent purchases</h2>
             <ul className="mt-4 lg:mt-[3.75em]">
-              { mostRecentPurchases.map(({ time, name }: any) => (
+              { (mostRecentPurchases ?? []).map(({ time, name }: any) => (
                 <li key={name} className="py-2 px-3 rounded-md bg-zinc-100 bg-opacity-5 flex gap-2 mb-2">
                   <span className="text-zinc-400">{time}</span>
                   <span className="font-semibold text-zinc-200">{name}</span>
