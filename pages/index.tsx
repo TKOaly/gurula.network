@@ -10,14 +10,6 @@ import { TabPane, TabPaneContainer } from '@/components/TabPane';
 import { Logo } from '@/components/Logo';
 import { Histogram } from '@/components/Histogram';
 
-const coffeineContentLookup: Record<string, number> = {
-  'Coffee': 96,
-  'Aks Al': 32/100*250,
-  'Battery no calories': 32/100*250,
-  'Pepsi max tÃ¶lkissÃ¤': 32,
-};
-
-
 export async function getServerSideProps() {
   const db = await mysql.createConnection({
     host: process.env.DB_HOST,
@@ -47,35 +39,6 @@ export async function getServerSideProps() {
       purchasesPerHour.push({ diff: i, count });
     } else {
       purchasesPerHour.push({ diff: i, count: 0 });
-    }
-  }
-
-  const [purchasesPerItemPerHourRows]: [Array<{ diff: number, count: number, name: string }>] = await db.execute(`
-    SELECT
-      TIMESTAMPDIFF(HOUR, time, NOW()) diff,
-      COUNT(*) count,
-      descr AS name
-    FROM ITEMHISTORY
-    JOIN RVITEM ON RVITEM.itemid = ITEMHISTORY.itemid
-    WHERE actionid = 5 AND time > DATE_SUB(NOW(), INTERVAL 31 DAY)
-    GROUP BY DATE(time), HOUR(time), RVITEM.itemid
-    ORDER BY TIMESTAMPDIFF(HOUR, time, NOW()) DESC
-  `) as any;
-
-  let caffeinePerHour: { diff: number, count: number }[] = [];
-
-  purchasesPerItemPerHourRows
-    .forEach(({ diff, count, name }) => {
-      if (!caffeinePerHour[diff]) {
-        caffeinePerHour[diff] = { diff, count: 0 };
-      }
-
-      caffeinePerHour[diff].count += (coffeineContentLookup[name] ?? 0) * count;
-    });
-
-  for (let i = 0; i < purchasesPerItemPerHourRows[0].diff; i++) {
-    if (!caffeinePerHour[i]) {
-      caffeinePerHour[i] = { diff: i, count: 0 };
     }
   }
 
@@ -133,12 +96,11 @@ export async function getServerSideProps() {
       purchasesPerHour,
       mostPopularItems,
       mostRecentPurchases: mostRecentPurchases.map((row: any) => ({ name: row.name, time: format(row.time, 'HH:mm') })),
-      caffeinePerHour,
     },
   }
 }
 
-export default function Home({ purchasesPerHour, caffeinePerHour, mostPopularItems, mostRecentPurchases }: any) {
+export default function Home({ purchasesPerHour, mostPopularItems, mostRecentPurchases }: any) {
   const [metric, setMetric] = useState('spending');
   const [resolution, setResolution] = useState('hourly');
 
@@ -147,8 +109,6 @@ export default function Home({ purchasesPerHour, caffeinePerHour, mostPopularIte
 
     if (metric === 'spending') {
       data = purchasesPerHour;
-    } else if (metric === 'caffeine') {
-      data = caffeinePerHour;
     } else {
       data = [];
     }
@@ -189,7 +149,7 @@ export default function Home({ purchasesPerHour, caffeinePerHour, mostPopularIte
 
       return byDate;
     }
-  }, [metric, resolution, caffeinePerHour, purchasesPerHour]);
+  }, [metric, resolution, purchasesPerHour]);
 
   const popularPanes = useMemo(() => {
     return [['day', 'Day'], ['week', 'Week'], ['month', 'Month'], ['year', 'Year']]
