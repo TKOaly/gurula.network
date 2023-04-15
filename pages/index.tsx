@@ -10,8 +10,8 @@ import { TabPane, TabPaneContainer } from '@/components/TabPane';
 import { Logo } from '@/components/Logo';
 import { Histogram } from '@/components/Histogram';
 import { pool } from '@/db';
+import { MostPopularList } from '@/components/MostPopularList';
 
-type PopularResponse = Record<'day' | 'week' | 'month' | 'year', { itemid: number, name: string, count: number, previous_count: null | number }[]>;
 type RecentResponse = Array<{ time: string, neame: string }>;
 
 export default function Home() {
@@ -23,19 +23,6 @@ export default function Home() {
       const data = await response.json();
 
       setPurchasesPerHour(data);
-    };
-
-    run();
-  }, []);
-
-  const [mostPopularItems, setMostPopularItems] = useState<PopularResponse | null>(null);
-
-  useEffect(() => {
-    const run = async () => {
-      const response = await fetch(`/api/popular`);
-      const data = await response.json();
-
-      setMostPopularItems(data);
     };
 
     run();
@@ -62,43 +49,6 @@ export default function Home() {
     return [...purchasesPerHour].splice(purchasesPerHour.length - 5 * 24, 5 * 24) as { diff: number, count: number }[];
   }, [purchasesPerHour]);
 
-  const popularPanes = useMemo(() => {
-    return ([['day', 'Day'], ['week', 'Week'], ['month', 'Month'], ['year', 'Year']] as const)
-      .map(([key, label]) => (
-        <TabPane key={key} label={label}>
-          { (mostPopularItems?.[key] ?? []).map(({ count, name, previous_count }: any) => {
-            let trend_indicator = null;
-
-            if (previous_count !== null) {
-              if (previous_count < count) {
-                trend_indicator = (
-                  <div className="flex items-center top-0.5 text-green-400 font-bold relative">
-                    { count - previous_count }
-                    <ChevronsUp className="h-4 relative -top-0.5 -left-0.5" strokeWidth={3} />
-                  </div>
-                );
-              } else if (previous_count > count) {
-                trend_indicator = (
-                  <div className="flex items-center top-0.5 text-red-400 font-bold relative">
-                    { previous_count - count }
-                    <ChevronsDown className="h-4 relative -top-0.5 -left-0.5" strokeWidth={3} />
-                  </div>
-                );
-              }
-            }
-
-            return (
-              <li key={name} className="py-2 pl-3 pr-1 rounded-md bg-zinc-100 bg-opacity-5 flex gap-2 mb-2 items-center">
-                <span className="text-zinc-400">{count}x</span>
-                <span className="font-semibold text-zinc-200">{name}</span>
-                <div className="grow" />
-                { trend_indicator }
-              </li>
-            );
-          }) }
-        </TabPane>
-      ));
-  }, [mostPopularItems]);
 
   return (
     <main className="flex min-h-screen flex-col items-center px-6 py-3 lg:py-16 lg:px-24">
@@ -121,12 +71,7 @@ export default function Home() {
           <Histogram data={data} />
         </div>
         <div className="grid max-w-[30em] lg:w-full lg:max-w-full grid-cols-1 lg:grid-cols-2 gap-10 mt-3">
-          <div className="grow">
-            <h2 className="text-2xl text-zinc-200 font-semibold mb-2">Most popular items</h2>
-            <TabPaneContainer>
-              {popularPanes}
-            </TabPaneContainer>
-          </div>
+          <MostPopularList />
           <div className="grow">
             <h2 className="text-2xl text-zinc-200 font-semibold">Most recent purchases</h2>
             <ul className="mt-4 lg:mt-[3.75em]">
