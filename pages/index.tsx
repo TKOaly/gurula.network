@@ -12,44 +12,6 @@ import { Histogram } from '@/components/Histogram';
 import { pool } from '@/db';
 
 export async function getServerSideProps() {
-  const queryPopular = (hours: number) => pool.execute(sql`
-    SELECT c.*, p.count AS previous_count
-    FROM (
-      SELECT
-        RVITEM.itemid,
-        RVITEM.descr name,
-        COUNT(*) count
-      FROM ITEMHISTORY
-      JOIN RVITEM ON RVITEM.itemid = ITEMHISTORY.itemid
-      WHERE actionid = 5
-        AND TIMESTAMPDIFF(HOUR, time, NOW()) <= ${hours}
-        AND ITEMHISTORY.itemid NOT IN (58, 56, 1432)
-      GROUP BY RVITEM.itemid
-      ORDER BY COUNT(*) DESC
-      LIMIT 10
-    ) c
-    LEFT JOIN (
-      SELECT
-        itemid,
-        COUNT(*) count
-      FROM ITEMHISTORY
-      WHERE actionid = 5
-        AND TIMESTAMPDIFF(HOUR, time, NOW()) > ${hours}
-        AND TIMESTAMPDIFF(HOUR, time, NOW()) <= ${hours * 2}
-      GROUP BY itemid
-    ) p ON p.itemid = c.itemid
-    ORDER BY c.count DESC
-  `)
-
-  const [[day], [week], [month], [year]] = await Promise.all([
-    queryPopular(24),
-    queryPopular(24 * 7),
-    queryPopular(24 * 31),
-    queryPopular(24 * 365),
-  ]);
-  
-  const mostPopularItems = { day, week, month, year };
-
   const [mostRecentPurchases] = await pool.query<any>(`
     SELECT
       descr AS name,
@@ -63,13 +25,14 @@ export async function getServerSideProps() {
 
   return {
     props: {
-      mostPopularItems,
       mostRecentPurchases: mostRecentPurchases.map((row: any) => ({ name: row.name, time: format(row.time, 'HH:mm') })),
     },
   }
 }
 
-export default function Home({ mostPopularItems, mostRecentPurchases }: any) {
+type PopularResponse = Record<'day' | 'week' | 'month' | 'year', { itemid: number, name: string, count: number, previous_count: null | number }[]>;
+
+export default function Home({ mostRecentPurchases }: any) {
   const [purchasesPerHour, setPurchasesPerHour] = useState<{ count: number, diff: number }[] | null>(null);
 
   useEffect(() => {
@@ -78,6 +41,19 @@ export default function Home({ mostPopularItems, mostRecentPurchases }: any) {
       const data = await response.json();
 
       setPurchasesPerHour(data);
+    };
+
+    run();
+  }, []);
+
+  const [mostPopularItems, setMostPopularItems] = useState<PopularResponse | null>(null);
+
+  useEffect(() => {
+    const run = async () => {
+      const response = await fetch(`/api/popular`);
+      const data = await response.json();
+
+      setMostPopularItems(data);
     };
 
     run();
@@ -92,10 +68,10 @@ export default function Home({ mostPopularItems, mostRecentPurchases }: any) {
   }, [purchasesPerHour]);
 
   const popularPanes = useMemo(() => {
-    return [['day', 'Day'], ['week', 'Week'], ['month', 'Month'], ['year', 'Year']]
+    return ([['day', 'Day'], ['week', 'Week'], ['month', 'Month'], ['year', 'Year']] as const)
       .map(([key, label]) => (
         <TabPane key={key} label={label}>
-          { mostPopularItems[key].map(({ count, name, previous_count }: any) => {
+          { (mostPopularItems?.[key] ?? []).map(({ count, name, previous_count }: any) => {
             let trend_indicator = null;
 
             if (previous_count !== null) {
