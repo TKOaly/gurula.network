@@ -56,7 +56,7 @@ export default function Home() {
         <div className="h-[10em] sm:mt-14 sm:mb-10 lg:h-[20em] w-full">
           <Histogram data={data} />
         </div>
-        <div className="grid max-w-[30em] lg:w-full lg:max-w-full grid-cols-1 lg:grid-cols-2 gap-10 mt-3">
+        <div className="grid max-w-[30em] lg:w-full lg:max-w-full grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-10 mt-3">
           <MostPopularList />
           <MostRecentList />
         </div>
