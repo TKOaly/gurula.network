@@ -38,7 +38,7 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center px-6 py-3 lg:py-16 lg:px-24">
-      <div className="mb-3 lg:mb-10 flex self-stretch p-6">
+      <div className="mb-3 lg:mb-10 flex self-stretch py-6 md:px-6">
         <div className="h-[2.5em] lg:h-[5em]">
           <Logo />
         </div>
