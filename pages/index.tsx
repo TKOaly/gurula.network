@@ -101,55 +101,9 @@ export async function getServerSideProps() {
 }
 
 export default function Home({ purchasesPerHour, mostPopularItems, mostRecentPurchases }: any) {
-  const [metric, setMetric] = useState('spending');
-  const [resolution, setResolution] = useState('hourly');
-
   const data = useMemo(() => {
-    let data: { diff: number, count: number }[];
-
-    if (metric === 'spending') {
-      data = purchasesPerHour;
-    } else {
-      data = [];
-    }
-
-    if (resolution === 'hourly') {
-      return [...data].splice(data.length - 5 * 24, 5 * 24);
-    } else {
-      const byDate: { date: Date, diff: number, count: number }[] = [];
-
-      data
-        .forEach(({ diff, count }) => {
-          let previous = byDate[byDate.length - 1];
-
-          let newDate = null;
-
-          if (!previous) {
-            newDate = startOfDay(new Date());
-          }
-
-          if (previous) {
-            let date = startOfDay(subHours(new Date(), diff));
-
-            if (!isEqual(date, previous.date)) {
-              newDate = date;
-            }
-          }
-
-          if (newDate) {
-            byDate.push({
-              date: newDate,
-              diff: differenceInDays(new Date(), newDate),
-              count,
-            });
-          } else if (previous) {
-            previous.count += count;
-          }
-        });
-
-      return byDate;
-    }
-  }, [metric, resolution, purchasesPerHour]);
+    return [...purchasesPerHour].splice(purchasesPerHour.length - 5 * 24, 5 * 24) as { diff: number, count: number }[];
+  }, [purchasesPerHour]);
 
   const popularPanes = useMemo(() => {
     return [['day', 'Day'], ['week', 'Week'], ['month', 'Month'], ['year', 'Year']]
