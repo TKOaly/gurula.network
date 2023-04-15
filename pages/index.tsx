@@ -4,8 +4,9 @@ import { Bar, BarChart, Rectangle, ResponsiveContainer, Tooltip, XAxis } from 'r
 
 import mysql from 'mysql2/promise';
 import { differenceInDays, format, isEqual, startOfDay, subDays, subHours } from 'date-fns';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { ChevronsDown, ChevronsUp, ExternalLink } from 'react-feather';
+import { TabPane, TabPaneContainer } from '@/components/TabPane';
 
 const shuffle = <T extends unknown>(unshuffled: T[]): T[] => unshuffled
   .map(value => ({ value, sort: Math.random() }))
@@ -65,76 +66,6 @@ const coffeineContentLookup: Record<string, number> = {
   'Pepsi max tÃ¶lkissÃ¤': 32,
 };
 
-interface TabBarTab {
-  key: string
-  label: string
-}
-
-type TabBarProps<T extends TabBarTab> = {
-  tabs: T[],
-  selected: string,
-  onSelect: (key: string, i: number, tab: T) => void,
-}
-
-const TabBar = <T extends TabBarTab>({ tabs, selected, onSelect }: TabBarProps<T>) => {
-  const tabRefs = useRef<HTMLDivElement[]>([]);
-  const backgroundRef = useRef<HTMLDivElement>(null);
-
-  const setTabRef = (i: number) => (ref: HTMLDivElement) => tabRefs.current[i] = ref;
-
-  const handleSelect = useCallback((tab: T, i: number) => {
-    const ref = tabRefs.current[i];
-
-    if (ref && backgroundRef.current) {
-      const size = ref.getBoundingClientRect();
-      backgroundRef.current.style.opacity = '1';
-      backgroundRef.current.style.width = size.width + 'px';
-      backgroundRef.current.style.height = size.height + 'px';
-      backgroundRef.current.style.left = ref.offsetLeft + 'px';
-      backgroundRef.current.style.top = ref.offsetTop + 'px';
-    }
-
-    onSelect(tab.key, i, tab);
-  }, [tabRefs, backgroundRef, onSelect]);
-
-  useEffect(() => {
-    const background = backgroundRef.current;
-
-    if (background) {
-      const handler = () => {
-        if (background) {
-          background.style.opacity = '0';
-        }
-      };
-
-      background.addEventListener('transitionend', handler);
-
-      return () => background.removeEventListener('transitionend', handler);
-    }
-  }, [backgroundRef]);
-
-  return (
-    <div className="flex gap-x-3 gap-y-1 relative items-start">
-      <div
-        ref={backgroundRef}
-        className={`absolute rounded-md bg-zinc-100 transition-[width,heigth,left,top] bg-opacity-20 duration-200`}
-        style={{ opacity: '0' }}
-      />
-      {
-        tabs.map((tab, i) => (
-          <div
-            key={tab.key}
-            ref={setTabRef(i)}
-            className={`py-1 px-2 transition duration-0 cursor-pointer rounded-md font-bold text-zinc-200 ${selected === tab.key && 'bg-zinc-100 bg-opacity-20 delay-200'}`}
-            onClick={() => handleSelect(tab, i)}
-          >
-            {tab.label}
-          </div>
-        ))
-      }
-    </div>
-  );
-}
 
 export async function getServerSideProps() {
   const db = await mysql.createConnection({
@@ -263,7 +194,6 @@ export default function Home({ purchasesPerHour, caffeinePerHour, mostPopularIte
 
   const [metric, setMetric] = useState('spending');
   const [resolution, setResolution] = useState('hourly');
-  const [popularTimeFrame, setPopularTimeFrame] = useState('day');
 
   const data = useMemo(() => {
     let data: { diff: number, count: number }[];
@@ -329,6 +259,44 @@ export default function Home({ purchasesPerHour, caffeinePerHour, mostPopularIte
     return ticks;
   }, [data, resolution]);
 
+  const popularPanes = useMemo(() => {
+    return [['day', 'Day'], ['week', 'Week'], ['month', 'Month'], ['year', 'Year']]
+      .map(([key, label]) => (
+        <TabPane key={key} label={label}>
+          { mostPopularItems[key].map(({ count, name, previous_count }: any) => {
+            let trend_indicator = null;
+
+            if (previous_count !== null) {
+              if (previous_count < count) {
+                trend_indicator = (
+                  <div className="flex items-center top-0.5 text-green-400 font-bold relative">
+                    { count - previous_count }
+                    <ChevronsUp className="h-4 relative -top-0.5 -left-0.5" strokeWidth={3} />
+                  </div>
+                );
+              } else if (previous_count > count) {
+                trend_indicator = (
+                  <div className="flex items-center top-0.5 text-red-400 font-bold relative">
+                    { previous_count - count }
+                    <ChevronsDown className="h-4 relative -top-0.5 -left-0.5" strokeWidth={3} />
+                  </div>
+                );
+              }
+            }
+
+            return (
+              <li key={name} className="py-2 pl-3 pr-1 rounded-md bg-zinc-100 bg-opacity-5 flex gap-2 mb-2 items-center">
+                <span className="text-zinc-400">{count}x</span>
+                <span className="font-semibold text-zinc-200">{name}</span>
+                <div className="grow" />
+                { trend_indicator }
+              </li>
+            );
+          }) }
+        </TabPane>
+      ));
+  }, [mostPopularItems]);
+
   return (
     <main className="flex min-h-screen flex-col items-center px-6 py-3 lg:py-16 lg:px-24">
       <div className="mb-3 lg:mb-10 flex self-stretch p-6">
@@ -381,48 +349,9 @@ export default function Home({ purchasesPerHour, caffeinePerHour, mostPopularIte
         <div className="grid max-w-[30em] lg:w-full lg:max-w-full grid-cols-1 lg:grid-cols-2 gap-10 mt-3">
           <div className="grow">
             <h2 className="text-2xl text-zinc-200 font-semibold mb-2">Most popular items</h2>
-            <TabBar
-              tabs={[
-                { key: 'day', label: 'Day' },
-                { key: 'week', label: 'Week' },
-                { key: 'month', label: 'Month' },
-                { key: 'year', label: 'Year' },
-              ]}
-              selected={popularTimeFrame}
-              onSelect={(key) => setPopularTimeFrame(key)}
-            />
-            <ul className="mt-4">
-              { mostPopularItems[popularTimeFrame].map(({ count, name, previous_count }: any) => {
-                let trend_indicator = null;
-
-                if (previous_count !== null) {
-                  if (previous_count < count) {
-                    trend_indicator = (
-                      <div className="flex items-center top-0.5 text-green-400 font-bold relative">
-                        { count - previous_count }
-                        <ChevronsUp className="h-4 relative -top-0.5 -left-0.5" strokeWidth={3} />
-                      </div>
-                    );
-                  } else if (previous_count > count) {
-                    trend_indicator = (
-                      <div className="flex items-center top-0.5 text-red-400 font-bold relative">
-                        { previous_count - count }
-                        <ChevronsDown className="h-4 relative -top-0.5 -left-0.5" strokeWidth={3} />
-                      </div>
-                    );
-                  }
-                }
-
-                return (
-                  <li key={name} className="py-2 pl-3 pr-1 rounded-md bg-zinc-100 bg-opacity-5 flex gap-2 mb-2 items-center">
-                    <span className="text-zinc-400">{count}x</span>
-                    <span className="font-semibold text-zinc-200">{name}</span>
-                    <div className="grow" />
-                    { trend_indicator }
-                  </li>
-                );
-              }) }
-            </ul>
+            <TabPaneContainer>
+              {popularPanes}
+            </TabPaneContainer>
           </div>
           <div className="grow">
             <h2 className="text-2xl text-zinc-200 font-semibold">Most recent purchases</h2>
