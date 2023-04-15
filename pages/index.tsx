@@ -45,10 +45,10 @@ export default function Home() {
         <div className="grow" />
         <div className="items-center justify-end grow gap-5 hidden sm:flex">
           <a href="https://tko-aly.fi/" className={`py-1 pl-2 pr-1 cursor-pointer rounded-md font-bold text-zinc-200 bg-zinc-100 bg-opacity-10`}>
-            <span className="relative top-0.5 flex items-center gap-0.5">TKO-äly <ExternalLink className="h-4 relative -top-0.5" /></span>
+            <span className="flex items-center gap-0.5">TKO-äly <ExternalLink className="h-4" /></span>
           </a>
           <a href="https://heppa.tko-aly.fi/" className={`py-1 pl-2 pr-1 cursor-pointer rounded-md font-bold text-zinc-200 bg-zinc-100 bg-opacity-10`}>
-            <span className="relative top-0.5 flex items-center gap-0.5">Heppa <ExternalLink className="h-4 relative -top-0.5" /></span>
+            <span className="flex items-center gap-0.5">Heppa <ExternalLink className="h-4" /></span>
           </a>
         </div>
       </div>
