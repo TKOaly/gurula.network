@@ -4,7 +4,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(_req: NextApiRequest, res: NextApiResponse) {
   const queryPopular = (hours: number) => pool.execute(sql`
-    SELECT c.*, p.count AS previous_count
+    SELECT c.*, COALESCE(p.count, 0) AS previous_count
     FROM (
       SELECT
         RVITEM.itemid,
