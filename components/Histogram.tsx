@@ -1,18 +1,36 @@
-import { format, subHours } from "date-fns";
-import { useMemo } from "react";
+import { format, parseISO, subHours } from "date-fns";
+import { useEffect, useMemo, useState } from "react";
 import { Bar, BarChart, Rectangle, ResponsiveContainer, Tooltip, XAxis } from "recharts";
-
-export type Props = {
-  data: { diff: number, count: number }[],
-  timestamp: Date,
-};
 
 const MyBar = ({ fill, diff, ...props }: any) => {
   return <Rectangle {...props} radius={3} fill={fill} />;
 };
 
+export const Histogram = () => {
+  const [purchasesPerHour, setPurchasesPerHour] = useState<{ count: number, diff: number }[] | null>(null);
+  const [timestamp, setTimestamp] = useState(new Date());
 
-export const Histogram = ({ data, timestamp }: Props) => {
+  useEffect(() => {
+    const run = async () => {
+      const response = await fetch(`/api/spending`);
+      const { timestamp, purchasesPerHour } = await response.json();
+
+      setPurchasesPerHour(purchasesPerHour);
+      setTimestamp(parseISO(timestamp));
+    };
+
+    run();
+  }, []);
+
+  const data = useMemo(() => {
+    if (purchasesPerHour === null) {
+      return [];
+    }
+
+    return [...purchasesPerHour].splice(purchasesPerHour.length - 5 * 24, 5 * 24) as { diff: number, count: number }[];
+  }, [purchasesPerHour]);
+
+
   const ticks = useMemo(() => {
     const ticks = [];
     const currentHour = timestamp.getHours();
