@@ -23,7 +23,7 @@ export const MostRecentList = () => {
       <ul className="mt-4 lg:mt-[3.75em]">
         { !mostRecentPurchases && <ListSkeleton /> }
         { mostRecentPurchases && mostRecentPurchases.map(({ time, name }: any) => (
-          <li key={name} className="py-2 px-3 rounded-md bg-zinc-100 bg-opacity-5 flex gap-2 mb-2">
+          <li key={name} className="items-center py-2 px-3 rounded-md bg-zinc-100 bg-opacity-5 flex gap-2 mb-2">
             <span className="text-zinc-400">{time}</span>
             <span className="font-semibold text-zinc-200">{name}</span>
           </li>
