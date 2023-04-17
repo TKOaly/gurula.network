@@ -4,6 +4,7 @@ import { Bar, BarChart, Rectangle, ResponsiveContainer, Tooltip, XAxis } from "r
 
 export type Props = {
   data: { diff: number, count: number }[],
+  timestamp: Date,
 };
 
 const MyBar = ({ fill, diff, ...props }: any) => {
@@ -11,10 +12,10 @@ const MyBar = ({ fill, diff, ...props }: any) => {
 };
 
 
-export const Histogram = ({ data }: Props) => {
+export const Histogram = ({ data, timestamp }: Props) => {
   const ticks = useMemo(() => {
     const ticks = [];
-    const currentHour = new Date().getHours();
+    const currentHour = timestamp.getHours();
 
     for (let i = data.length - currentHour; i >= 0; i -= 24) {
       ticks.push(data.length - i - 1);
@@ -35,7 +36,7 @@ export const Histogram = ({ data }: Props) => {
         <XAxis
           dataKey="diff"
           ticks={ticks}
-          tickFormatter={(diff) => format(subHours(new Date(), diff), 'EEE')}
+          tickFormatter={(diff) => format(subHours(timestamp, diff), 'EEE')}
         />
         <Tooltip
           cursor={{ fill: 'rgba(255,255,255,0.1)' }}
@@ -43,7 +44,7 @@ export const Histogram = ({ data }: Props) => {
             try {
               return (
                 <div className="bg-zinc-900 py-1 px-2 rounded-sm bg-opacity-80 text-zinc-200 shadow-lg">
-                  <b>{format(subHours(new Date(), label + 1), 'HH:mm')}-{format(subHours(new Date(), label), 'HH:mm')}</b> <br/>
+                  <b>{format(subHours(timestamp, label + 1), 'HH:mm')}-{format(subHours(timestamp, label), 'HH:mm')}</b> <br/>
                   {payload?.[0]?.value} purchases
                 </div>
               );

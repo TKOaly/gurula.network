@@ -24,5 +24,10 @@ export default async function handler(_req: NextApiRequest, res: NextApiResponse
     }
   }
 
-  res.status(200).json(purchasesPerHour);
+  res
+    .status(200)
+    .json({
+      timestamp: new Date(),
+      purchasesPerHour,
+    });
 }

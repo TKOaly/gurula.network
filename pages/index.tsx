@@ -3,7 +3,7 @@ import sql from 'sql-template-strings';
 import { Bar, BarChart, Rectangle, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
 
 import mysql from 'mysql2/promise';
-import { differenceInDays, format, isEqual, startOfDay, subDays, subHours } from 'date-fns';
+import { differenceInDays, format, isEqual, parseISO, startOfDay, subDays, subHours } from 'date-fns';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronsDown, ChevronsUp, ExternalLink } from 'react-feather';
 import { TabPane, TabPaneContainer } from '@/components/TabPane';
@@ -15,13 +15,15 @@ import { MostRecentList } from '@/components/MostRecentList';
 
 export default function Home() {
   const [purchasesPerHour, setPurchasesPerHour] = useState<{ count: number, diff: number }[] | null>(null);
+  const [timestamp, setTimestamp] = useState(new Date());
 
   useEffect(() => {
     const run = async () => {
       const response = await fetch(`/api/spending`);
-      const data = await response.json();
+      const { timestamp, purchasesPerHour } = await response.json();
 
-      setPurchasesPerHour(data);
+      setPurchasesPerHour(purchasesPerHour);
+      setTimestamp(parseISO(timestamp));
     };
 
     run();
@@ -54,7 +56,7 @@ export default function Home() {
       </div>
       <div className="w-full lg:w-[60em] items-center flex flex-col justify-between font-mono text-sm">
         <div className="h-[10em] sm:mt-14 sm:mb-10 lg:h-[20em] w-full">
-          <Histogram data={data} />
+          <Histogram data={data} timestamp={timestamp} />
         </div>
         <div className="grid max-w-[30em] lg:w-full lg:max-w-full grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-10 mt-3">
           <MostPopularList />
