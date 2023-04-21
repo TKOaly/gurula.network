@@ -3,6 +3,7 @@ import { Logo } from '@/components/Logo';
 import { Histogram } from '@/components/Histogram';
 import { MostPopularList } from '@/components/MostPopularList';
 import { MostRecentList } from '@/components/MostRecentList';
+import { RecentlyStockedList } from '@/components/RecentlyStockedList';
 
 export default function Home() {
   return (
@@ -28,6 +29,7 @@ export default function Home() {
         <div className="grid max-w-[30em] lg:w-full lg:max-w-full grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-10 mt-3">
           <MostPopularList />
           <MostRecentList />
+          <RecentlyStockedList />
         </div>
       </div>
     </main>
