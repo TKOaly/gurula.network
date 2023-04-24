@@ -16,7 +16,8 @@ export default async function handler(_req: NextApiRequest, res: NextApiResponse
       time
     FROM ITEMHISTORY
     JOIN RVITEM ON RVITEM.itemid = ITEMHISTORY.itemid
-    WHERE actionid = 5 AND ITEMHISTORY.itemid NOT IN (58, 56, 1432)
+    JOIN RVPERSON ON RVPERSON.userid = ITEMHISTORY.userid
+    WHERE actionid = 5 AND ITEMHISTORY.itemid NOT IN (58, 56, 1432) AND privacy_level <= 1
     ORDER BY time
     DESC LIMIT 10
   `);
