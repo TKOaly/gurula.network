@@ -34,7 +34,11 @@ export const HelpDialog = ({ onClose, show }: Props) => {
     }
   };
 
-  return show && createPortal(
+  if (!show) {
+    return null;
+  }
+
+  return createPortal(
     <div
       className="fixed overflow-y-scroll w-[100vw] h-[100vh] inset-0 flex items-center justify-center"
       ref={backdropRef}
