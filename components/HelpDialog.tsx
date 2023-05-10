@@ -50,7 +50,7 @@ export const HelpDialog = ({ onClose, show }: Props) => {
         <div className="px-2 md:overflow-y-scroll">
           <h3 className="text-xl font-semibold mt-5 mb-1">What is gurula.network?</h3>
           <p className="">
-            This site, <b>gurula.network</b>, displays real-time statistics from the Ruokavälitys (RV) register system located in TKO-äly ry's student room Gurula.
+            This site, <b>gurula.network</b>, displays real-time statistics from the Ruokavälitys (RV) register system located in TKO-äly ry&apos;s student room Gurula.
           </p>
           <h3 className="text-xl font-semibold mt-5 mb-1">What is Gurula?</h3>
           <p className="">
