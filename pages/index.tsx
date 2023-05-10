@@ -1,11 +1,15 @@
-import { ExternalLink } from 'react-feather';
+import { ExternalLink, HelpCircle } from 'react-feather';
 import { Logo } from '@/components/Logo';
 import { Histogram } from '@/components/Histogram';
 import { MostPopularList } from '@/components/MostPopularList';
 import { MostRecentList } from '@/components/MostRecentList';
 import { RecentlyStockedList } from '@/components/RecentlyStockedList';
+import { useState } from 'react';
+import { HelpDialog } from '@/components/HelpDialog';
 
 export default function Home() {
+  const [helpDialogOpen, setHelpDialogOpen] = useState(false);
+
   return (
     <main className="flex min-h-screen flex-col items-center px-6 py-3 lg:py-16 lg:px-24">
       <div className="mb-3 lg:mb-10 flex self-stretch py-6 md:px-6">
@@ -13,11 +17,14 @@ export default function Home() {
           <Logo />
         </div>
         <div className="grow" />
-        <div className="items-center justify-end grow gap-5 hidden sm:flex">
-          <a href="https://tko-aly.fi/" className={`py-1 pl-2 pr-1 cursor-pointer rounded-md font-bold text-zinc-200 bg-zinc-100 bg-opacity-10`}>
+        <div className="items-center justify-end grow gap-5 flex">
+          <a onClick={() => setHelpDialogOpen(true)} className={`py-1 pl-2 pr-1 cursor-pointer rounded-md font-bold text-zinc-200 bg-zinc-100 bg-opacity-10`}>
+            <span className="flex items-center gap-0.5">Help <HelpCircle className="h-4" /></span>
+          </a>
+          <a href="https://tko-aly.fi/" className={`py-1 pl-2 pr-1 cursor-pointer rounded-md font-bold text-zinc-200 bg-zinc-100 bg-opacity-10 hidden sm:block`}>
             <span className="flex items-center gap-0.5">TKO-äly <ExternalLink className="h-4" /></span>
           </a>
-          <a href="https://heppa.tko-aly.fi/" className={`py-1 pl-2 pr-1 cursor-pointer rounded-md font-bold text-zinc-200 bg-zinc-100 bg-opacity-10`}>
+          <a href="https://heppa.tko-aly.fi/" className={`py-1 pl-2 pr-1 cursor-pointer rounded-md font-bold text-zinc-200 bg-zinc-100 bg-opacity-10 hidden sm:block`}>
             <span className="flex items-center gap-0.5">Heppa <ExternalLink className="h-4" /></span>
           </a>
         </div>
@@ -32,6 +39,7 @@ export default function Home() {
           <RecentlyStockedList />
         </div>
       </div>
+      <HelpDialog onClose={() => setHelpDialogOpen(false)} show={helpDialogOpen} />
     </main>
   )
 }
