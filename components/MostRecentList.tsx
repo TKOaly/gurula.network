@@ -26,6 +26,9 @@ export const MostRecentList = () => {
           <li key={name} className="items-center py-2 px-3 rounded-md bg-zinc-100 bg-opacity-5 flex gap-2 mb-2">
             <span className="text-zinc-400">{time}</span>
             <span className="font-semibold text-zinc-200">{name}</span>
+            { name === 'Coffee' && (
+              <a href="https://www.netlight.com/" className="text-zinc-400 hover:underline">Sponsored by Netlight</a>
+            ) }
           </li>
         )) }
       </ul>
