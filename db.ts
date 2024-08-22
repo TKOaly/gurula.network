@@ -1,8 +1,6 @@
-import mysql from 'mysql2/promise';
+import pg from 'pg'
+const { Pool } = pg
 
-export const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-});
+// pools will use environment variables
+// for connection information
+export const pool = new Pool()

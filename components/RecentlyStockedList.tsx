@@ -46,7 +46,6 @@ type RecentlyStockedResponse = Array<{
   time: string
   name: string
   count: number
-  currentCount: number
   isNew: boolean
 }>;
 

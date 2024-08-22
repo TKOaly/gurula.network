@@ -27,7 +27,7 @@ export const Histogram = () => {
       return [];
     }
 
-    return [...purchasesPerHour].splice(purchasesPerHour.length - 5 * 24, 5 * 24) as { diff: number, count: number }[];
+    return [...purchasesPerHour].slice(0, 5 * 24) as { diff: number, count: number }[];
   }, [purchasesPerHour]);
 
 
