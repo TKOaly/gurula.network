@@ -25,7 +25,7 @@ export default async function handler(_req: NextApiRequest, res: NextApiResponse
   const result = mostRecentPurchases
     .map((row: any) => ({
       name: row.name,
-      time: format(row.time, 'HH:mm'),
+      time: row.time,
     }));
 
   res.status(200).json(result);

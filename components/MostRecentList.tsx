@@ -9,8 +9,11 @@ export const MostRecentList = () => {
   useEffect(() => {
     const run = async () => {
       const response = await fetch(`/api/recent`);
-      const data = await response.json();
-
+      let data = await response.json();
+      data = data.map(({ time, name }: any) => {
+        time = new Date(time)
+        return { time: time.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }), name: name }
+      });
       setMostRecentPurchases(data);
     };
 
