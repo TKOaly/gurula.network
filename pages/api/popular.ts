@@ -9,7 +9,7 @@ export default async function handler(_req: NextApiRequest, res: NextApiResponse
       SELECT
         "RVITEM".itemid,
         "RVITEM".descr name,
-        COUNT(*) count
+        COUNT(*)::int count
       FROM "ITEMHISTORY"
       JOIN "RVITEM" ON "RVITEM".itemid = "ITEMHISTORY".itemid
       WHERE actionid = 5
@@ -22,7 +22,7 @@ export default async function handler(_req: NextApiRequest, res: NextApiResponse
     LEFT JOIN ( 
       SELECT
         itemid,
-        COUNT(*) count
+        COUNT(*)::int count
       FROM "ITEMHISTORY"
       WHERE actionid = 5
         AND age(NOW(), time) > $1::interval
